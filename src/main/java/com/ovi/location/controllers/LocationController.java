@@ -5,18 +5,17 @@ import com.ovi.location.services.LocationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
 @Controller
 public class LocationController {
 
-    private final
-    LocationService locationService;
+    private final LocationService locationService;
 
-    @Autowired
     public LocationController(LocationService locationService) {
         this.locationService = locationService;
     }
@@ -26,37 +25,31 @@ public class LocationController {
         return "createLocation";
     }
 
-    @PostMapping("/locationSave")
-    public String saveLocation(
-            @ModelAttribute("location") Location location,
-            RedirectAttributes redirectAttributes
-    ) {
+    @RequestMapping("/locationSave")
+    public String saveLocation(@ModelAttribute("location") Location location, ModelMap modelMap) {
         Location result = locationService.saveLocation(location);
         String msg = "Location is saved with " + result.getId();
-        redirectAttributes.addFlashAttribute("msg", msg);
-        return "redirect:/displayLocations";
+        List<Location> locations = locationService.getAllLocations();
+        modelMap.addAttribute("msg", msg);
+        modelMap.addAttribute("locations", locations);
+        return "displayLocations";
     }
 
     @RequestMapping("/displayLocations")
-    public String displayLocations(
-            ModelMap modelMap,
-            @ModelAttribute("msg") String message) {
-        if(message!=null){
-            modelMap.addAttribute("msg", message);
-        }
+    public String displayLocations(ModelMap modelMap) {
         List<Location> locations = locationService.getAllLocations();
         modelMap.addAttribute("locations", locations);
-        return "displaylocations";
+        return "displayLocations";
     }
 
-    @RequestMapping("/deleteLocations")
-    public String deleteLocations(@RequestParam("id") int id, ModelMap modelMap) {
+    @RequestMapping("/deleteLocation")
+    public String deleteLocation(@RequestParam("id") int id, ModelMap modelMap) {
         Location location = new Location();
         location.setId(id);
         locationService.deleteLocation(location);
         List<Location> locations = locationService.getAllLocations();
         modelMap.addAttribute("locations", locations);
-        return "displaylocations";
+        return "displayLocations";
     }
 
     @RequestMapping("/updateLocation")
@@ -66,10 +59,12 @@ public class LocationController {
         return "updateLocation";
     }
 
-    @RequestMapping(value = "/updateLoc", method = RequestMethod.POST)
+    @RequestMapping("/updateLoc")
     public String updateLoc(@ModelAttribute("location") Location location, ModelMap modelMap) {
-        locationService.updateLocation(location);
+        Location result = locationService.updateLocation(location);
+        String msg = "Location is saved with " + result.getId() + "updates";
         List<Location> locations = locationService.getAllLocations();
+        modelMap.addAttribute("msg", msg);
         modelMap.addAttribute("locations", locations);
         return "displayLocations";
     }
