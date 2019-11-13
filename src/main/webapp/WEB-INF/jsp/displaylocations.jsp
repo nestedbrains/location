@@ -9,6 +9,7 @@
     <title>Locations List</title>
 </head>
 <body>
+<p style="color: crimson">${msg}</p>
 <h2>Locations</h2>
 <div class="main">
     <table>
